@@ -2,7 +2,22 @@ import telebot
 import time
 import requests
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b'Bot is running!')
+
+def run_web_server():
+    port = int(os.environ.get('PORT', 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
+    print(f"Web server starting on port {port}")
+    server.serve_forever()
+  
 def get_crypto_data():
     binance_data = requests.get("https://fapi.binance.com/fapi/v1/ticker/price").json()
 
@@ -100,18 +115,24 @@ def get_tables(column_1_len=4, column_2_len=13, column_3_len=12, column_4_len=12
 
     return tables
 
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
-CHAT_ID = os.environ.get('CHAT_ID')
+def run_bot(bot, chat_id):
+    while True:
+        tables = get_tables()
+        try:
+            for table_text in tables:
+                bot.send_message(chat_id,  text=table_text,  parse_mode='HTML')
+        except Exception as e:
+            print(f"Error: {e}")
+
+        time.sleep(300)
 
 
-bot = telebot.TeleBot(BOT_TOKEN)
+if __name__ == "__main__":
+    BOT_TOKEN = os.environ.get('BOT_TOKEN')
+    CHAT_ID = os.environ.get('CHAT_ID')
 
-while True:
-    tables = get_tables()
-    try:
-        for table_text in tables:
-            bot.send_message(CHAT_ID,  text=table_text,  parse_mode='HTML')
-    except Exception as e:
-        print(f"Error: {e}")
-    
-    time.sleep(100)
+    web_thread = threading.Thread(target=run_web_server, daemon=True)
+    web_thread.start()
+
+    bot = telebot.TeleBot(BOT_TOKEN)
+    run_bot(bot, CHAT_ID)
