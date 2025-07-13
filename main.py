@@ -76,8 +76,8 @@ def adapt_column_len(table_text, column_len):
         spaces_to_add = column_len - len(table_text)
         table_text += " " * spaces_to_add
 
-    # return table_text[:column_len]
-    return table_text
+    return table_text[:column_len]
+    # return table_text
 
 def get_tables(column_1_len=4, column_2_len=13, column_3_len=12, column_4_len=12):
     display_items = get_crypto_data()
