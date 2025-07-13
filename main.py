@@ -19,7 +19,7 @@ def run_web_server():
     server.serve_forever()
   
 def get_crypto_data():
-    binance_data = requests.get("https://fapi.binance.com/fapi/v1/ticker/price").json()
+    binance_data = requests.get("https://api.binance.com/api/v3/ticker/price").json()
 
     okx = requests.get("https://www.okx.com/api/v5/market/tickers?instType=SPOT").json()
 
