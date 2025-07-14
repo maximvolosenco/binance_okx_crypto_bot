@@ -135,4 +135,14 @@ if __name__ == "__main__":
     web_thread.start()
 
     bot = telebot.TeleBot(BOT_TOKEN)
-    run_bot(bot, CHAT_ID)
+
+    while True:
+        tables = get_tables()
+        try:
+            for table_text in tables:
+                bot.send_message(CHAT_ID,  text=table_text,  parse_mode='HTML')
+        except Exception as e:
+            print(f"Error: {e}")
+
+        time.sleep(300)
+    # run_bot(bot, CHAT_ID)
